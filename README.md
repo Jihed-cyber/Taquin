@@ -38,6 +38,7 @@ def Numéro_case_vide(self,taquin):
         "Renvoi la position du zero (entier)"
         for i in range(0,len(taquin),1):
             if taquin[i]==0:
+              return i
 
 
 
