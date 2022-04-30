@@ -147,8 +147,8 @@ def activate(event):
     avec les identifiants des objets graphiques que l'utilisateur peut déplacer
     """
     global grid_square, lin, col
-    col_mouse = event.x // 125
-    lin_mouse = event.y // 125
+    col_mouse = event.x // (WIDTH // N)
+    lin_mouse = event.y // (HEIGHT // N)
     refresh_grid()
     active_square = []
     active_number = []
@@ -176,7 +176,46 @@ def activate(event):
 def move(list1, list2, X, Y):
     for i in range(len(list1)):
         canvas.itemconfigure(list1[i], fill="red")
-        canvas.move(list1[i], X-canvas.coords(list1[i])[0], Y-canvas.coords(list2[i])[1])
+        
+
+# résolution automatique
+
+
+def resoudre(self):
+        "Resoudre le taquin"
+        solveur = Solveur(self.taquin)
+        res = solveur.resoudre()
+        if res == None :
+            print ("Pas de solution trouvée")
+        else:
+            print ("Solution trouvée en ",len(res),"coups")
+            self.afficherResult(res)
+
+
+taquin_2= [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+
+def Numéro_case_vide(self,taquin):
+        "Renvoi la position du zero (entier)"
+        for i in range(0,len(taquin),1):
+            if taquin[i]==0:
+                      return i
+
+
+def testBut(self,taquin):
+        "Vérifie si le but est atteint(entier[0,1])"
+        if taquin == taquin_2:
+            return 1
+        else :
+            return 0
+
+game=3
+
+def Test(self,taquin):
+        "Vérifie si le jeu est déjà en mémoire(entier[0,1])"
+        for i in range(0,len(self.open List),1):
+            if self.openList[i][game] == taquin :
+                return 1
+
 
 
 #########################
