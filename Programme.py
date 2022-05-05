@@ -1,5 +1,5 @@
 #######################
-# Auteur: Jean Le Mire
+# Auteur: Jean Le Mire, Jihed Redjil
 
 ########################
 # import des librairies
@@ -178,43 +178,152 @@ def move(list1, list2, X, Y):
         canvas.itemconfigure(list1[i], fill="red")
         
 
-# résolution automatique
+# résolution automatique ( Jihed )
 
 
-def resoudre(self):
-        "Resoudre le taquin"
-        solveur = Solveur(self.taquin)
-        res = solveur.resoudre()
-        if res == None :
-            print ("Pas de solution trouvée")
-        else:
-            print ("Solution trouvée en ",len(res),"coups")
-            self.afficherResult(res)
+global a 
+a=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0]
+pos=[15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+
+global v,d
+nbv = [0 for i in range (0,16)]
+v = [[0 for i in range (0,4)] for j in range (0,16)]
+d=v
+
+def grid():
+    for i in range (0,16):
+        k=0
+        if ((i+1)%4!=0):
+            v[i][k]=i+1
+            d[i][k]=0
+            k=k+1
+        if (i%N!=0):
+            v[i][k]=i-4
+            d[i][k]=1
+            k=k+1
+        if (i<12):
+            v[i][k]=i+N
+            d[i][k]=3
+            k=k+1
+            nbv[i]=k
 
 
-taquin_2= [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15]
+def find_case_vide(taquin):
+    for i in range(0,16):
+        if taquin[i]==0:
+            return i
+ 
+global compteur, poscv, oldposcv    
+poscv =  find_case_vide(taquin)
+oldposcv= poscv
+b=[]
+compteur = 0
 
-def Numéro_case_vide(self,taquin):
-        "Renvoi la position du zero (entier)"
-        for i in range(0,len(taquin),1):
-            if taquin[i]==0:
-                      return i
+
+#v: liste qui contient les voisins des indices de chaque chiffre
 
 
-def testBut(self,taquin):
-        "Vérifie si le but est atteint(entier[0,1])"
-        if taquin == taquin_2:
-            return 1
-        else :
-            return 0
+def movcv():
+        h=0
+        compteur=0
+        while(v[poscv][h]==oldposcv):
+            h=random.randint(0,nbv[poscv])
+        b[compteur]= d[poscv][h]
+        if (d[poscv][h]==0):
+            droitecvl()
+        elif (d[poscv][h]==1):
+            monteecv()
+        elif (d[poscv][h]==2):
+            gauchecv()
+        elif (d[poscv][h]==3):
+            descentecv()
 
-game=3
+NP=16
 
-def Test(self,taquin):
-        "Vérifie si le jeu est déjà en mémoire(entier[0,1])"
-        for i in range(0,len(self.open List),1):
-            if self.openList[i][game] == taquin :
-                return 1
+def droitecvl():
+    a[poscv]=a[poscv+1]
+    pos[a[poscv]]=poscv
+    poscv=poscv+1
+    a[poscv]=15
+    pos[15]=poscv
+
+def gauchecv():
+    a[poscv]=a[poscv-1]
+    pos[a[poscv]]=poscv
+    poscv=poscv-1
+    a[poscv]=NP-1
+    pos[NP-1]=poscv
+
+def descentecv():
+    a[poscv]=a[poscv+N]
+    pos[a[poscv]]=poscv
+    poscv=poscv+N
+    a[poscv]=NP-1
+    pos[NP-1]=poscv
+
+
+def monteecv():
+    a[poscv]=a[poscv-N]
+    pos[a[poscv]]=poscv
+    poscv=poscv-N
+    a[poscv]=NP-1
+    pos[NP-1]=poscv
+
+def put_disorder():
+    for i in range (0,16):
+        a[i]=i # rectangle avec l’ordre naturel pour les blocs carrés
+    grid()
+    oldposcv= -1
+    poscv=NP-1 #conditions initiales pour la case vide, qui a deux possibilités de mouvements,
+      # la valeur initiale de oldpcv ne provoquant aucun empêchement
+    for i in range (0,30000):
+        movcv()      # déplacements répétés de la case vide */
+        diffvert=P-1-poscv/N #différence verticale entre la position actuelle et la position finale de la case vide */
+        if taquin == a:
+            break
+    for i in range (0, diffvert):
+        descentecv()  
+        compteur += 1
+        b[compteur]=3 #mémorisation des mouvememts dans b[] */
+        diffort=N-1-poscv%N  #de même horizontalement */
+    for i in range (0, diffort):
+        droitecv()
+        compteur += 1
+        b[compteur]=0
+
+def put_order():
+    for i in range(0,compteur,-1):
+        if (b[i]==0):
+            gauchecv()
+        elif (b[i]==1):
+            descentecv()
+        elif (b[i]==2):
+            droitecv()
+        elif (b[i]==3):
+            monteecv()
+
+
+
+
+def is_tried():
+    for i in range(0,15):
+        if(taquin[i]>taquin[i+1]):
+            return False
+    return True
+
+def autoplay():
+    """ Dans l'hypothèse où le taquin a été créé """
+    if is_tried() is True:
+        print("La liste est déjà trié :)")
+        return None
+    else:
+        grid()
+        poscv = find_case_vide(taquin)
+        oldposcv= poscv
+        put_disorder()
+        put_order()
+        print("a = ",a)
+        print("taquin = ",taquin)
 
 
 
