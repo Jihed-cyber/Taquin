@@ -32,7 +32,7 @@ Pour ma partie (Jihed):
 # résolution automatique du taquin.
 
 
-Tout d'abord, un résumé de ma situation pour vous. Pour la partie de jean de résolution manuel du taquin qui nécessite l'utilisation des fonctions activate et move, il y a un problème car jean bug sur la fonction move et je ne peux pas l'aider car ca nécessite de comprendre la fonction activate qui est la seul fonction que je comprends pas et précisement active_square et number que je comprends absolument pas après des heures car il n'y a pas de texte explicatif. Bonne chance à jean pour finir de coder ceci. Mais ce n'est pas grave car bonne nouvelle au niveau de la résolution automatique qui m'a pris des jours,je suis bien car cela fonctionne. Le seul problème est qu'il faut que j'installe le module canvas que j'ai pas mais sinon c'est correcte. Donc on a quand meme quelque chose de solide. Voici l'explication :
+Tout d'abord, un résumé de ma situation pour vous. Pour la partie de jean de résolution manuel du taquin qui nécessite l'utilisation des fonctions activate et move, il y a un problème car jean bug sur la fonction move et je ne peux pas l'aider car ca nécessite de comprendre la fonction activate qui est la seul fonction que je comprends pas et précisement active_square et number que je comprends absolument pas après des heures car il n'y a pas de texte explicatif. Bonne chance à jean pour finir de coder ceci. Mais ce n'est pas grave car bonne nouvelle au niveau de la résolution automatique qui m'a pris des jours,je suis bien car cela fonctionne avec la fameuse Autoplay(), :) .Le seul problème est qu'il faut que j'installe le module canvas que j'ai pas mais sinon c'est correcte. Donc on a quand meme quelque chose de solide. Voici l'explication :
 
 
                 
