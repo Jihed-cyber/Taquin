@@ -41,7 +41,7 @@ Ici, je vous détail le raisonnement.
 
 Etape 1 :
 
-On part de l’ordre naturel, ce qui revient à mettre dans le tableau a[] (ordre naturel du taquin) les numéros successifs de 0 à l
+On part de l’ordre naturel, ce qui revient à mettre dans le tableau a[] (ordre naturel du taquin) les numéros successifs de 0 à 
 NP – 1. Pour rappel NP=16 avec N : nombre de ligne, P nombre de colonne à savoir 4*4=16.  
 
 Le tableau inverse pos[]  est un tableau des positions, qui donne la position de chaque numéro. Après répétition de la fonction movcv, on va provoquer un grand nombre de mouvement de la case vide. Par conséquent, la case vide va se déplacé vers ses voisines (haut, gauche, droite, bas) d'ou l'utilité d'une fonction grid() afin de déterminé pour chaque case ses voisines et leur nombre. Pour une  case en position i, les positions de ses voisins sont enregistrées dans le tableau v[i][k] et le nombre de voisins dans nbv[i]. Et pour enregsitrer la direction du voisins on utilise le tableau d[i][k].
