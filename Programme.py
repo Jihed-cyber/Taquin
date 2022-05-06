@@ -344,6 +344,19 @@ def Solveur():
         print("taquin = ",taquin)
 
 
+ # grid :détermine pour chaque case quelles sont ses voisines ainsi que leur nombre.
+# find_case_vide : Trouver la position de la case vide d'indice 0
+# is_tried : Savoir si la liste bidimensionel donc le taquin est trié ou non
+# movcv : faire bouger la case vide par mouvement aléatoire afin de créer le désordre
+# droitecv : Faire bouger la case vide vers la droite
+# gauchecv : faire bouger la case vide vers la gauche
+# monteecv : la faire bouger vers le haut
+# descentecv : la faire bouger vers le bas
+# put_disorder: mettre le désordre ( voir détail de chaque étape de la fonction à chaque ligne)
+# put_order : remettre l'ordre en appelant les fonctions droitecv, descentecv, monteecv, gauchecv
+# Solveur : Algorithme principal utilisant put_order et disorder afin de résoudre le taquin 
+
+
 #########################
 # partie principale
 
