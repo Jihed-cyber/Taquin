@@ -6,6 +6,7 @@
 
 import tkinter as tk
 import random as rd
+import copy as cp
 
 
 ########################
@@ -33,6 +34,7 @@ lin = 0
 ####################
 # fonctions
 
+
 def init_taquin():
     """Remplit la liste taquin à deux dimension des entiers de 0 à 15 mélangés."""
     global taquin, taquin_step
@@ -40,7 +42,7 @@ def init_taquin():
     rd.shuffle(list_entier)
     for i in range(N):
         taquin.append(list_entier[N*i:N*(i+1)])
-    taquin_step.append(taquin)
+    new_step()
     init_grid()
 
 
@@ -92,7 +94,6 @@ def find_index():
     canvas.delete(grid_number[col][lin])
 
 
-
 def refresh_grid():
     """Affiche le taquin de la configuration courante"""
     global grid_number, grid_square, taquin, lin, col
@@ -134,9 +135,32 @@ def load():
         if j == N:
             j = 0
             i += 1
-    taquin_step.append(taquin)
+    new_step()
     refresh_grid()
     fic.close()
+
+
+
+# commande du bouton annuler déplacement
+
+
+def new_step():
+    """Chaque fois que le taquin est modifié, ajoute le taquin courant dans la liste taquin_step"""
+    global taquin_step, taquin
+    current_taquin = cp.deepcopy(taquin)
+    taquin_step.append(current_taquin)
+    
+
+def cancel_move():
+    """Permet d'annuler le cas échéant un déplacement
+    en revenant à la configuration du taquin antérieure
+    """
+    global taquin_step, taquin
+    if len(taquin_step) >= 2:
+        taquin = taquin_step[-2]
+        del taquin_step[-1]
+        refresh_grid()
+
 
 
 # fonctions evenementielles
@@ -171,14 +195,13 @@ def activate(event):
     move(active_square, active_number, event.x, event.y)
 
 
-    
-
 def move(list1, list2, X, Y):
     for i in range(len(list1)):
         canvas.itemconfigure(list1[i], fill="red")
         
 
-# résolution automatique ( Jihed )
+
+# résolution automatique
 
 
 global a 
@@ -213,9 +236,9 @@ def find_case_vide(taquin):
         if taquin[i]==0:
             return i
  
-global compteur, poscv, oldposcv    
-poscv =  find_case_vide(taquin)
-oldposcv= poscv
+# global compteur, poscv, oldposcv    
+# poscv =  find_case_vide(taquin)
+# oldposcv= poscv
 b=[]
 compteur = 0
 
@@ -227,10 +250,10 @@ def movcv():
         h=0
         compteur=0
         while(v[poscv][h]==oldposcv):
-            h=random.randint(0,nbv[poscv])
+            h=rd.randint(0,nbv[poscv])
         b[compteur]= d[poscv][h]
         if (d[poscv][h]==0):
-            droitecvl()
+            droitecv()
         elif (d[poscv][h]==1):
             monteecv()
         elif (d[poscv][h]==2):
@@ -240,7 +263,7 @@ def movcv():
 
 NP=16
 
-def droitecvl():
+def droitecv():
     a[poscv]=a[poscv+1]
     pos[a[poscv]]=poscv
     poscv=poscv+1
@@ -335,7 +358,7 @@ root = tk.Tk()
 root.title("Taquin")
 button_save = tk.Button(root, text="Sauvergarder \n taquin", command=save)
 button_load = tk.Button(root, text="Charger taquin", command=load)
-button_cancel = tk.Button(root, text="Annuler déplacement")
+button_cancel = tk.Button(root, text="Annuler déplacement", command=cancel_move)
 button_autoplay = tk.Button(root, text="Résoudre  \n automatiquement")
 canvas = tk.Canvas(root, height=HEIGHT, width=WIDTH)
 
