@@ -204,11 +204,9 @@ def move(list1, list2, X, Y):
 # résolution automatique
 
 
-global a 
 a=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0]
 pos=[15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
 
-global v,d
 nbv = [0 for i in range (0,16)]
 v = [[0 for i in range (0,4)] for j in range (0,16)]
 d=v
@@ -235,10 +233,9 @@ def find_case_vide(taquin):
     for i in range(0,16):
         if taquin[i]==0:
             return i
- 
-# global compteur, poscv, oldposcv    
-# poscv =  find_case_vide(taquin)
-# oldposcv= poscv
+
+poscv =  find_case_vide(taquin)
+oldposcv= poscv
 b=[]
 compteur = 0
 
@@ -247,23 +244,23 @@ compteur = 0
 
 
 def movcv():
-        h=0
-        compteur=0
-        while(v[poscv][h]==oldposcv):
-            h=rd.randint(0,nbv[poscv])
-        b[compteur]= d[poscv][h]
-        if (d[poscv][h]==0):
-            droitecv()
-        elif (d[poscv][h]==1):
-            monteecv()
-        elif (d[poscv][h]==2):
-            gauchecv()
-        elif (d[poscv][h]==3):
-            descentecv()
+    h=0
+    compteur=0
+    while(v[poscv][h]==oldposcv):
+        h=random.randint(0,nbv[poscv])
+    b[compteur]= d[poscv][h]
+    if (d[poscv][h]==0):
+        droitecvl()
+    elif (d[poscv][h]==1):
+        monteecv()
+    elif (d[poscv][h]==2):
+        gauchecv()
+    elif (d[poscv][h]==3):
+        descentecv()
 
 NP=16
 
-def droitecv():
+def droitecvl():
     a[poscv]=a[poscv+1]
     pos[a[poscv]]=poscv
     poscv=poscv+1
@@ -298,7 +295,7 @@ def put_disorder():
     grid()
     oldposcv= -1
     poscv=NP-1 #conditions initiales pour la case vide, qui a deux possibilités de mouvements,
-      # la valeur initiale de oldpcv ne provoquant aucun empêchement
+        # la valeur initiale de oldpcv ne provoquant aucun empêchement
     for i in range (0,30000):
         movcv()      # déplacements répétés de la case vide */
         diffvert=P-1-poscv/N #différence verticale entre la position actuelle et la position finale de la case vide */
@@ -326,15 +323,13 @@ def put_order():
             monteecv()
 
 
-
-
 def is_tried():
     for i in range(0,15):
         if(taquin[i]>taquin[i+1]):
             return False
     return True
 
-def autoplay():
+def Solveur():
     """ Dans l'hypothèse où le taquin a été créé """
     if is_tried() is True:
         print("La liste est déjà trié :)")
@@ -347,7 +342,6 @@ def autoplay():
         put_order()
         print("a = ",a)
         print("taquin = ",taquin)
-
 
 
 #########################
