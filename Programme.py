@@ -369,11 +369,8 @@ button_cancel.grid(row=1, column=2*N//4)
 button_autoplay.grid(row=1, column=3*N//4)
 canvas.grid(column=0, row=0, columnspan=4)
 
-
-############################""
-# lieu d'essai programme
+# initialisation du taquin
 init_taquin()
-
 
 # evenementiel
 canvas.bind("<Button-1>", activate)
