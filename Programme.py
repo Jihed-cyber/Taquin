@@ -333,8 +333,13 @@ def move_horizontal(move_square, move_number, move_taquin, col_clic, lin_clic, m
 # résolution automatique
 
 
+<<<<<<< HEAD
 a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0]
 pos = [15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+=======
+a=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0]
+pos=[15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+>>>>>>> 8d102860e82216b4ddfda133dcabf3ff65f17c57
 
 nbv = [0 for i in range (0,16)]
 v = [[0 for i in range (0,4)] for j in range (0,16)]
@@ -366,10 +371,16 @@ def find_case_vide(taquin):
         if taquin[i] == 0:
             return i
 
+<<<<<<< HEAD
 
 #poscv =  find_case_vide(taquin)
 #oldposcv= poscv
 b = []
+=======
+poscv =  find_case_vide(taquin)
+oldposcv= poscv
+b=[]
+>>>>>>> 8d102860e82216b4ddfda133dcabf3ff65f17c57
 compteur = 0
 
 
@@ -377,6 +388,7 @@ compteur = 0
 
 
 def movcv():
+<<<<<<< HEAD
     """faire bouger la case vide par mouvement aléatoire afin de créer le désordre"""
     h = 0
     compteur = 0
@@ -390,9 +402,24 @@ def movcv():
     elif d[poscv][h] == 2:
         gauchecv()
     elif d[poscv][h] == 3:
+=======
+    h=0
+    compteur=0
+    while(v[poscv][h]==oldposcv):
+        h=random.randint(0,nbv[poscv])
+    b[compteur]= d[poscv][h]
+    if (d[poscv][h]==0):
+        droitecvl()
+    elif (d[poscv][h]==1):
+        monteecv()
+    elif (d[poscv][h]==2):
+        gauchecv()
+    elif (d[poscv][h]==3):
+>>>>>>> 8d102860e82216b4ddfda133dcabf3ff65f17c57
         descentecv()
 
 
+<<<<<<< HEAD
 NP = 16
 
 
@@ -404,6 +431,14 @@ def droitecvl():
     a[poscv] = 15
     pos[15] = poscv
 
+=======
+def droitecvl():
+    a[poscv]=a[poscv+1]
+    pos[a[poscv]]=poscv
+    poscv=poscv+1
+    a[poscv]=15
+    pos[15]=poscv
+>>>>>>> 8d102860e82216b4ddfda133dcabf3ff65f17c57
 
 def gauchecv():
     """faire bouger la case vide vers la gauche"""
@@ -437,8 +472,13 @@ def put_disorder():
     for i in range (0,16):
         a[i] = i # rectangle avec l’ordre naturel pour les blocs carrés
     grid()
+<<<<<<< HEAD
     oldposcv = -1
     poscv = NP - 1 #conditions initiales pour la case vide, qui a deux possibilités de mouvements,
+=======
+    oldposcv= -1
+    poscv=NP-1 #conditions initiales pour la case vide, qui a deux possibilités de mouvements,
+>>>>>>> 8d102860e82216b4ddfda133dcabf3ff65f17c57
         # la valeur initiale de oldpcv ne provoquant aucun empêchement
     for i in range (0,30000):
         movcv()      # déplacements répétés de la case vide */
@@ -476,11 +516,16 @@ def is_tried():
             return False
     return True
 
+<<<<<<< HEAD
 
 def Solveur():
     """ Dans l'hypothèse où le taquin a été créé
     algorithme principal utilisant put_order et disorder afin de résoudre le taquin
     """
+=======
+def Solveur():
+    """ Dans l'hypothèse où le taquin a été créé """
+>>>>>>> 8d102860e82216b4ddfda133dcabf3ff65f17c57
     if is_tried() is True:
         print("La liste est déjà trié :)")
         return None
@@ -493,6 +538,18 @@ def Solveur():
         print("a = ",a)
         print("taquin = ",taquin)
 
+
+ # grid :détermine pour chaque case quelles sont ses voisines ainsi que leur nombre.
+# find_case_vide : Trouver la position de la case vide d'indice 0
+# is_tried : Savoir si la liste bidimensionel donc le taquin est trié ou non
+# movcv : faire bouger la case vide par mouvement aléatoire afin de créer le désordre
+# droitecv : Faire bouger la case vide vers la droite
+# gauchecv : faire bouger la case vide vers la gauche
+# monteecv : la faire bouger vers le haut
+# descentecv : la faire bouger vers le bas
+# put_disorder: mettre le désordre ( voir détail de chaque étape de la fonction à chaque ligne)
+# put_order : remettre l'ordre en appelant les fonctions droitecv, descentecv, monteecv, gauchecv
+# Solveur : Algorithme principal utilisant put_order et disorder afin de résoudre le taquin 
 
 
 #########################
