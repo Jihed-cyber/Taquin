@@ -363,6 +363,10 @@ def grid():
             d[i][k] = 3
             k = k + 1
             nbv[i] = k
+        if (i%N!=0):
+            v[i][k]=i-1
+            d[i][k]=1
+            k=k+1
 
 
 def find_case_vide(taquin):
