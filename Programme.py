@@ -5,8 +5,9 @@
 # import des librairies
 
 import tkinter as tk
-import random as rd
-import copy as cp
+from random import randint, shuffle
+from copy import deepcopy
+from functools import partial
 
 
 ########################
@@ -39,11 +40,35 @@ def init_taquin():
     """Remplit la liste taquin à deux dimension des entiers de 0 à 15 mélangés."""
     global taquin, taquin_step
     list_entier = list(range(N**2))
-    rd.shuffle(list_entier)
+    shuffle(list_entier)
+    list_test = list_entier[:]
+    while resolvable(list_test) == False:
+        shuffle(list_test)
     for i in range(N):
         taquin.append(list_entier[N*i:N*(i+1)])
-    new_step()
     init_grid()
+
+
+def resolvable(list_mixed):
+    """Compte le nombre de permutations nécessaires entre les entiers de la liste des entiers mélangés
+    (liste qui servirait à construire la list bidimensonnelle taquin)
+    pour obtenir la liste des entiers correspondant au taquin résolu,
+    et renvoie True si la configuration serait résolvable et False sinon
+    """
+    taquin_solved = []
+    taquin_solved = list(range(1,N**2))
+    taquin_solved.append(0)
+    permutation = 0
+    while list_mixed != taquin_solved:
+        for i in range(N**2):
+            if list_mixed[i] != taquin_solved[i]:
+                wrong_index = list_mixed.index(taquin_solved[i])
+                list_mixed[i], list_mixed[wrong_index] = list_mixed[wrong_index], list_mixed[i]
+                permutation += 1
+    if permutation % 2 == 0:
+        return True
+    else:
+        return False
 
 
 def init_grid():
@@ -92,6 +117,8 @@ def find_index():
             col = taquin.index(lists)
     canvas.delete(grid_square[col][lin])
     canvas.delete(grid_number[col][lin])
+    new_step()
+    print(taquin_step)
 
 
 def refresh_grid():
@@ -135,7 +162,6 @@ def load():
         if j == N:
             j = 0
             i += 1
-    new_step()
     refresh_grid()
     fic.close()
 
@@ -147,8 +173,12 @@ def load():
 def new_step():
     """Chaque fois que le taquin est modifié, ajoute le taquin courant dans la liste taquin_step"""
     global taquin_step, taquin
-    current_taquin = cp.deepcopy(taquin)
-    taquin_step.append(current_taquin)
+    current_taquin = deepcopy(taquin)
+    if taquin_step == []:
+        taquin_step.append(current_taquin)
+    else:
+        if current_taquin != taquin_step[-1]:
+            taquin_step.append(current_taquin)
     
 
 def cancel_move():
@@ -170,76 +200,176 @@ def activate(event):
     """Remplit les listes active_square et active_number
     avec les identifiants des objets graphiques que l'utilisateur peut déplacer
     """
-    global grid_square, lin, col
+    global taquin, grid_square, grid_square, lin, col
     col_mouse = event.x // (WIDTH // N)
     lin_mouse = event.y // (HEIGHT // N)
     refresh_grid()
     active_square = []
     active_number = []
+    active_taquin = []
     if col_mouse == col:
         if lin_mouse < lin:
             active_square = grid_square[col][lin_mouse:lin]
             active_number = grid_number[col][lin_mouse:lin]
+            active_taquin = taquin[col][lin_mouse:lin]
+            direction = "bas"
         if lin_mouse > lin:
             active_square = grid_square[col][lin:lin_mouse+1]
             active_number = grid_number[col][lin:lin_mouse+1]
+            active_taquin = taquin[col][lin+1:lin_mouse+1]
+            direction = "haut"
     if lin_mouse == lin:
         if col_mouse < col:
             for i in range(col_mouse, col):
                 active_square.append(grid_square[i][lin])
                 active_number.append(grid_number[i][lin])
+                active_taquin.append(taquin[i][lin])
+            direction = "droite"
         if col_mouse > col:
-            for i in range(col, col_mouse+1):
+            for i in range(col+1, col_mouse+1):
                 active_square.append(grid_square[i][lin])
                 active_number.append(grid_number[i][lin])
-    move(active_square, active_number, event.x, event.y)
+                active_taquin.append(taquin[i][lin])
+            direction = "gauche"
+    movable(active_square, active_number, active_taquin, direction)
 
 
-def move(list1, list2, X, Y):
-    for i in range(len(list1)):
-        canvas.itemconfigure(list1[i], fill="red")
-        
+def movable(list_square, list_number, list_taquin, direction):
+    """Colorie les cases que le joueur va déplacer en rouge,
+    initialise les listes qui contiendront les coordonnées successives de la souris pendant le déplacement
+    et lie l'évènement relâchage du bouton de la souris à want_move
+    et l'évènement déplacement de la souris à get_move
+    """
+    for i in range(len(list_square)):
+        canvas.itemconfigure(list_square[i], fill="red")
+    list_abscissa = []
+    list_ordonate = []
+    canvas.bind("<ButtonRelease-1>", want_mvt)
+    canvas.bind("<Motion>", partial(get_move, list_x=list_ordonate, list_y=list_abscissa, dir=direction,
+    squares = list_square, numbers=list_number, taquin_select=list_taquin))
+
+
+def want_mvt(event):
+    """Détecte si la souris a été relâché
+    ce qui signifie le cas échéant que l'utilisateur ne souhaite pas déplacer les cases présélectionnées,
+    donc annule le déplacement en cours
+    """
+    global grid_number, grid_square
+    canvas.unbind("<Motion>")
+    for i in range(N):
+        for j in range(N):
+            canvas.delete(grid_square[i][j])
+            canvas.delete(grid_number[i][j])        
+    init_grid()
+
+
+def get_move(event, list_x, list_y, dir, squares, numbers, taquin_select):
+    """Récupère les coordonnées de la souris lorsqu'on la bouge
+    et déplace les cases suivant le mouvment de la souris,
+    puis actualise le taquin et les grilles en fonction du déplacement
+    """
+    global taquin
+    list_x.append(event.x)
+    list_y.append(event.y)
+    col_mouse = list_x[0] // (WIDTH // N)
+    lin_mouse = list_y[0] // (HEIGHT // N)
+    dx, dy = 0, 0
+    if len(list_x) >= 2:
+        dx = list_x[-1] - list_x[-2]
+    if len(list_y) >= 2:
+        dy = list_y[-1] - list_y[-2]
+    if dir == "haut" and dy <= 0: # or dir == "bas" and dy>= 0
+        if dy <= 0:
+            move_vertical(move_square=squares, move_number=numbers, lin_clic=lin_mouse, move_y=list_y, dy=dy)
+    if dir == "bas":
+        if dy >= 0:
+            move_vertical(move_square=squares, move_number=numbers, lin_clic=lin_mouse, move_y=list_y, dy=dy)
+    if dir == "gauche":
+        if dx <= 0:
+            move_horizontal(move_square=squares, move_number=numbers, move_taquin=taquin_select,
+            col_clic=col_mouse, lin_clic=lin_mouse, move_x=list_x, dx=dx, direction="gauche")
+    if dir == "droite":
+        if dx >= 0:
+             move_horizontal(move_square=squares, move_number=numbers, move_taquin=taquin_select,
+            col_clic=col_mouse, lin_clic=lin_mouse, move_x=list_x, dx=dx, direction="droite")          
+    
+
+def move_vertical(move_square, move_number, lin_clic, move_y, dy):
+    """Déplace les cases suivant le mouvment de la souris dans le cas d'un mouvement vertical
+    puis actualise le taquin et les grilles en fonction du déplacement
+    """
+    global taquin
+    for i in range(len(move_square)):
+        canvas.move(move_square[i], 0, dy)
+        canvas.move(move_number[i], 0, dy)
+        if (move_y[-1] - move_y[0]) ** 2 >= ((HEIGHT // N) // 1.2) ** 2:
+            taquin[col].remove(0)
+            taquin[col].insert(lin_clic, 0)
+            refresh_grid()
+            canvas.unbind("<Motion>")
+
+
+def move_horizontal(move_square, move_number, move_taquin, col_clic, lin_clic, move_x, dx, direction):
+    """Déplace les cases suivant le mouvment de la souris dans le cas d'un mouvement vertical
+    puis actualise le taquin et les grilles en fonction du déplacement
+    """
+    global taquin
+    for i in range(len(move_square)):
+        canvas.move(move_square[i], dx, 0)
+        canvas.move(move_number[i], dx, 0)
+        if (move_x[-1] - move_x[0]) ** 2 >= ((HEIGHT // N) // 1.2) ** 2:
+            taquin[col_clic][lin_clic] = 0
+            for i in range(len(move_taquin)):
+                if direction == "droite":
+                    taquin[col-i][lin] = move_taquin[-1-i]
+                if direction == "gauche":
+                    taquin[col+i][lin] = move_taquin[i]
+            refresh_grid()
+            canvas.unbind("<Motion>")
+
+
 
 
 # résolution automatique
 
 
-global a 
-a=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,0]
-pos=[15,0,1,2,3,4,5,6,7,8,9,10,11,12,13,14]
+a = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 0]
+pos = [15, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
 
-global v,d
 nbv = [0 for i in range (0,16)]
 v = [[0 for i in range (0,4)] for j in range (0,16)]
-d=v
+d = v
+
 
 def grid():
+    """détermine pour chaque case quelles sont ses voisines ainsi que leur nombre."""
     for i in range (0,16):
-        k=0
-        if ((i+1)%4!=0):
-            v[i][k]=i+1
-            d[i][k]=0
-            k=k+1
-        if (i%N!=0):
-            v[i][k]=i-4
-            d[i][k]=1
-            k=k+1
-        if (i<12):
-            v[i][k]=i+N
-            d[i][k]=3
-            k=k+1
-            nbv[i]=k
+        k = 0
+        if (i+1)%4 != 0:
+            v[i][k] = i + 1
+            d[i][k] = 0
+            k = k+1
+        if i%N != 0:
+            v[i][k] = i - 4
+            d[i][k] = 1
+            k =  k + 1
+        if i < 12:
+            v[i][k] = i + N
+            d[i][k] = 3
+            k = k + 1
+            nbv[i] = k
 
 
 def find_case_vide(taquin):
+    """Trouver la position de la case vide d'indice 0"""
     for i in range(0,16):
-        if taquin[i]==0:
+        if taquin[i] == 0:
             return i
- 
-# global compteur, poscv, oldposcv    
-# poscv =  find_case_vide(taquin)
-# oldposcv= poscv
-b=[]
+
+
+#poscv =  find_case_vide(taquin)
+#oldposcv= poscv
+b = []
 compteur = 0
 
 
@@ -247,102 +377,117 @@ compteur = 0
 
 
 def movcv():
-        h=0
-        compteur=0
-        while(v[poscv][h]==oldposcv):
-            h=rd.randint(0,nbv[poscv])
-        b[compteur]= d[poscv][h]
-        if (d[poscv][h]==0):
-            droitecv()
-        elif (d[poscv][h]==1):
-            monteecv()
-        elif (d[poscv][h]==2):
-            gauchecv()
-        elif (d[poscv][h]==3):
-            descentecv()
+    """faire bouger la case vide par mouvement aléatoire afin de créer le désordre"""
+    h = 0
+    compteur = 0
+    while v[poscv][h] == oldposcv:
+        h = randint(0,nbv[poscv])
+    b[compteur] = d[poscv][h]
+    if d[poscv][h] == 0:
+        droitecvl()
+    elif d[poscv][h] == 1:
+        monteecv()
+    elif d[poscv][h] == 2:
+        gauchecv()
+    elif d[poscv][h] == 3:
+        descentecv()
 
-NP=16
 
-def droitecv():
-    a[poscv]=a[poscv+1]
-    pos[a[poscv]]=poscv
-    poscv=poscv+1
-    a[poscv]=15
-    pos[15]=poscv
+NP = 16
+
+
+def droitecvl():
+    """Faire bouger la case vide vers la droite"""
+    a[poscv] = a[poscv+1]
+    pos[a[poscv]] = poscv
+    poscv = poscv + 1
+    a[poscv] = 15
+    pos[15] = poscv
+
 
 def gauchecv():
-    a[poscv]=a[poscv-1]
-    pos[a[poscv]]=poscv
-    poscv=poscv-1
-    a[poscv]=NP-1
-    pos[NP-1]=poscv
+    """faire bouger la case vide vers la gauche"""
+    a[poscv] = a[poscv-1]
+    pos[a[poscv]] = poscv
+    poscv = poscv - 1
+    a[poscv] = NP - 1
+    pos[NP-1]= poscv
+
 
 def descentecv():
-    a[poscv]=a[poscv+N]
-    pos[a[poscv]]=poscv
-    poscv=poscv+N
-    a[poscv]=NP-1
-    pos[NP-1]=poscv
+    """Faire bouger la case vide vers le bas"""
+    a[poscv] = a[poscv+N]
+    pos[a[poscv]] = poscv
+    poscv = poscv + N
+    a[poscv] = NP - 1
+    pos[NP-1] = poscv
 
 
 def monteecv():
-    a[poscv]=a[poscv-N]
-    pos[a[poscv]]=poscv
-    poscv=poscv-N
-    a[poscv]=NP-1
-    pos[NP-1]=poscv
+    """Faire bouger la case vide vers le haut"""
+    a[poscv] = a[poscv-N]
+    pos[a[poscv]] = poscv
+    poscv = poscv - N
+    a[poscv] = NP - 1
+    pos[NP-1] = poscv
+
 
 def put_disorder():
+    """mettre le désordre (voir détail de chaque étape de la fonction à chaque ligne)"""
     for i in range (0,16):
-        a[i]=i # rectangle avec l’ordre naturel pour les blocs carrés
+        a[i] = i # rectangle avec l’ordre naturel pour les blocs carrés
     grid()
-    oldposcv= -1
-    poscv=NP-1 #conditions initiales pour la case vide, qui a deux possibilités de mouvements,
-      # la valeur initiale de oldpcv ne provoquant aucun empêchement
+    oldposcv = -1
+    poscv = NP - 1 #conditions initiales pour la case vide, qui a deux possibilités de mouvements,
+        # la valeur initiale de oldpcv ne provoquant aucun empêchement
     for i in range (0,30000):
         movcv()      # déplacements répétés de la case vide */
-        diffvert=P-1-poscv/N #différence verticale entre la position actuelle et la position finale de la case vide */
+        diffvert = P - 1 - poscv / N #différence verticale entre la position actuelle et la position finale de la case vide */
         if taquin == a:
             break
     for i in range (0, diffvert):
         descentecv()  
         compteur += 1
-        b[compteur]=3 #mémorisation des mouvememts dans b[] */
-        diffort=N-1-poscv%N  #de même horizontalement */
+        b[compteur] = 3 #mémorisation des mouvememts dans b[] */
+        diffort = N - 1 - poscv % N  #de même horizontalement */
     for i in range (0, diffort):
         droitecv()
         compteur += 1
-        b[compteur]=0
+        b[compteur] = 0
+
 
 def put_order():
+    """remettre l'ordre en appelant les fonctions droitecv, descentecv, monteecv, gauchecv"""
     for i in range(0,compteur,-1):
-        if (b[i]==0):
+        if b[i] == 0:
             gauchecv()
-        elif (b[i]==1):
+        elif b[i] == 1:
             descentecv()
-        elif (b[i]==2):
+        elif b[i] == 2:
             droitecv()
-        elif (b[i]==3):
+        elif b[i] == 3:
             monteecv()
 
 
-
-
 def is_tried():
+    """Savoir si la liste bidimensionel donc le taquin est trié ou non"""
     for i in range(0,15):
-        if(taquin[i]>taquin[i+1]):
+        if taquin[i] > taquin[i+1]:
             return False
     return True
 
-def autoplay():
-    """ Dans l'hypothèse où le taquin a été créé """
+
+def Solveur():
+    """ Dans l'hypothèse où le taquin a été créé
+    algorithme principal utilisant put_order et disorder afin de résoudre le taquin
+    """
     if is_tried() is True:
         print("La liste est déjà trié :)")
         return None
     else:
         grid()
         poscv = find_case_vide(taquin)
-        oldposcv= poscv
+        oldposcv = poscv
         put_disorder()
         put_order()
         print("a = ",a)
